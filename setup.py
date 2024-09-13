@@ -58,7 +58,7 @@ _deps = [
     "sphinx-multiversion==0.2.4",
     "timeout-decorator",
     "torch",
-    "transformers~=4.44.0",
+    # "transformers",
 ]
 
 
@@ -131,9 +131,7 @@ extras["dev"] = (
 )
 
 # when modifying the following list, make sure to update src/transformers/dependency_versions_check.py
-install_requires = [
-    deps["transformers"],
-]
+install_requires = ["transformers@git+https://github.com/zucchini-nlp/transformers.git@train_predict"]
 
 setup(
     name="adapters",

@@ -32,6 +32,7 @@ class AdapterTrainer(Trainer):
         model: Union[PreTrainedModel, nn.Module] = None,
         args: TrainingArguments = None,
         data_collator: Optional[DataCollator] = None,
+        eval_data_collator: Optional[DataCollator] = None,
         train_dataset: Optional[Dataset] = None,
         eval_dataset: Optional[Dataset] = None,
         tokenizer: Optional[PreTrainedTokenizerBase] = None,
@@ -46,11 +47,12 @@ class AdapterTrainer(Trainer):
             model_quantized = getattr(model, "is_quantized", False)
             model.is_quantized = False
         super().__init__(
-            model,
-            args,
-            data_collator,
-            train_dataset,
-            eval_dataset,
+            model=model,
+            args=args,
+            data_collator=data_collator,
+            eval_data_collator=eval_data_collator,
+            train_dataset=train_dataset,
+            eval_dataset=eval_dataset,
             tokenizer=tokenizer,
             model_init=model_init,
             compute_metrics=compute_metrics,
