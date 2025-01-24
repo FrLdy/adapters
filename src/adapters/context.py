@@ -89,7 +89,7 @@ class ForwardContext(ContextManager):
         "adapter_gating_scores",
         "adapter_fusion_attentions",
         "adapter_input_parallelized",
-        "batch_task_ids",
+        "task_ids",
     ]
     # Additional used attributes not exposed to the user
     # - prompt_tokens_length: length of the prompt tokens

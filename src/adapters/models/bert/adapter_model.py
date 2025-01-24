@@ -18,7 +18,11 @@ from transformers.utils.doc import add_code_sample_docstrings
 
 from ...context import AdapterSetup
 from ...heads import ModelWithFlexibleHeadsAdaptersMixin
-from ...model_mixin import EmbeddingAdaptersWrapperMixin
+from ...model_mixin import (
+    EmbeddingAdaptersWrapperMixin,
+    ModelAdaptersMixin,
+    ModelWithHeadsAdaptersMixin,
+)
 from ...wrappers import init
 
 
@@ -168,7 +172,9 @@ class BertAdapterModel(
         }
 
 
-class BertForSequenceClassification(BaseBertForSequenceClassification):
+class BertForSequenceClassificationAdapterModel(
+    BaseBertForSequenceClassification,
+):
     def forward(
         self,
         input_ids: Optional[torch.Tensor] = None,
