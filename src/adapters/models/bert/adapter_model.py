@@ -124,7 +124,7 @@ class BertAdapterModel(
                 "adapter_input_parallelized", False
             ),
             output_context=True,
-            **kwargs,
+            task_ids=kwargs.pop("task_ids", None),
         )
         # required e.g. for prompt tuning in all models
         kwargs["context"] = context
