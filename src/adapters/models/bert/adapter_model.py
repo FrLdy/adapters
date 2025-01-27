@@ -175,6 +175,11 @@ class BertAdapterModel(
 class BertForSequenceClassificationAdapterModel(
     BaseBertForSequenceClassification,
 ):
+
+    def __init__(self, config):
+        super().__init__(config)
+        init(self)
+
     def forward(
         self,
         input_ids: Optional[torch.Tensor] = None,
