@@ -1866,7 +1866,6 @@ class ModelBaseAdaptersMixin(ModelAdaptersMixin):
 
     @ForwardContext.wrap_base
     def forward(self, *args, **kwargs):
-        print("base context: ", ForwardContext.get_context().__dict__)
         return super().forward(*args, **kwargs)
 
 
@@ -2482,5 +2481,4 @@ class ModelWithHeadsAdaptersMixin(ModelAdaptersMixin):
 
     @ForwardContext.wrap
     def forward(self, *args, **kwargs):
-        print("head context: ", ForwardContext.get_context().__dict__)
         return super().forward(*args, **kwargs)
