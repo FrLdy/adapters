@@ -52,13 +52,13 @@ _import_structure = {
         "DoubleSeqBnInvConfig",
         "DynamicAdapterFusionConfig",
         "IA3Config",
-        "MTLConfigUnion",
-        "MTLConfig",
-        "MTLLoRAConfig",
         "LoRAConfig",
         "LoReftConfig",
         "MAMConfig",
         "ModelAdaptersConfig",
+        "MTLConfig",
+        "MTLConfigUnion",
+        "MTLLoRAConfig",
         "NoReftConfig",
         "ParBnConfig",
         "PrefixTuningConfig",
@@ -211,10 +211,7 @@ if TYPE_CHECKING:
         Seq2SeqLMHead,
         TaggingHead,
     )
-    from .methods.adapter_layer_base import (
-        AdapterLayerBase,
-        ComposableAdapterLayerBase,
-    )
+    from .methods.adapter_layer_base import AdapterLayerBase, ComposableAdapterLayerBase
     from .model_mixin import (
         EmbeddingAdaptersMixin,
         InvertibleAdaptersMixin,
@@ -226,10 +223,7 @@ if TYPE_CHECKING:
     from .models.auto import ADAPTER_MODEL_MAPPING, AutoAdapterModel
     from .models.bart import BartAdapterModel
     from .models.beit import BeitAdapterModel
-    from .models.bert import (
-        BertAdapterModel,
-        BertForSequenceClassificationAdapterModel,
-    )
+    from .models.bert import BertAdapterModel, BertForSequenceClassificationAdapterModel
     from .models.bert_generation import BertGenerationAdapterModel
     from .models.clip import CLIPAdapterModel
     from .models.deberta import DebertaAdapterModel

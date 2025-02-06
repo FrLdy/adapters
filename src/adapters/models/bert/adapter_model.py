@@ -1,28 +1,19 @@
+from typing import Optional, Tuple, Union
+
+import torch
+from torch.nn import BCEWithLogitsLoss, CrossEntropyLoss, MSELoss
+
 from transformers.generation import GenerationMixin
-from transformers.models.bert.modeling_bert import (
-    BERT_INPUTS_DOCSTRING,
-    BERT_START_DOCSTRING,
-)
-from transformers.models.bert.modeling_bert import (
-    BertForSequenceClassification as BaseBertForSequenceClassification,
-)
-from transformers.models.bert.modeling_bert import (
-    BertModel,
-    BertPreTrainedModel,
-)
-from transformers.utils import (
-    add_start_docstrings,
-    add_start_docstrings_to_model_forward,
-)
+from transformers.modeling_outputs import SequenceClassifierOutput
+from transformers.models.bert.modeling_bert import BERT_INPUTS_DOCSTRING, BERT_START_DOCSTRING
+from transformers.models.bert.modeling_bert import BertForSequenceClassification as BaseBertForSequenceClassification
+from transformers.models.bert.modeling_bert import BertModel, BertPreTrainedModel
+from transformers.utils import add_start_docstrings, add_start_docstrings_to_model_forward
 from transformers.utils.doc import add_code_sample_docstrings
 
 from ...context import AdapterSetup
 from ...heads import ModelWithFlexibleHeadsAdaptersMixin
-from ...model_mixin import (
-    EmbeddingAdaptersWrapperMixin,
-    ModelAdaptersMixin,
-    ModelWithHeadsAdaptersMixin,
-)
+from ...model_mixin import EmbeddingAdaptersWrapperMixin, ModelAdaptersMixin, ModelWithHeadsAdaptersMixin
 from ...wrappers import init
 
 
@@ -31,7 +22,10 @@ from ...wrappers import init
     BERT_START_DOCSTRING,
 )
 class BertAdapterModel(
-    EmbeddingAdaptersWrapperMixin, ModelWithFlexibleHeadsAdaptersMixin, BertPreTrainedModel, GenerationMixin
+    EmbeddingAdaptersWrapperMixin,
+    ModelWithFlexibleHeadsAdaptersMixin,
+    BertPreTrainedModel,
+    GenerationMixin,
 ):
 
     head_types = [
@@ -55,9 +49,7 @@ class BertAdapterModel(
 
         self.init_weights()
 
-    @add_start_docstrings_to_model_forward(
-        BERT_INPUTS_DOCSTRING.format("batch_size, sequence_length")
-    )
+    @add_start_docstrings_to_model_forward(BERT_INPUTS_DOCSTRING.format("batch_size, sequence_length"))
     def forward(
         self,
         input_ids=None,
@@ -74,39 +66,17 @@ class BertAdapterModel(
         output_adapter_fusion_attentions=False,
         **kwargs,
     ):
-        input_ids = (
-            input_ids.view(-1, input_ids.size(-1))
-            if input_ids is not None
-            else None
-        )
-        attention_mask = (
-            attention_mask.view(-1, attention_mask.size(-1))
-            if attention_mask is not None
-            else None
-        )
-        token_type_ids = (
-            token_type_ids.view(-1, token_type_ids.size(-1))
-            if token_type_ids is not None
-            else None
-        )
-        position_ids = (
-            position_ids.view(-1, position_ids.size(-1))
-            if position_ids is not None
-            else None
-        )
+        input_ids = input_ids.view(-1, input_ids.size(-1)) if input_ids is not None else None
+        attention_mask = attention_mask.view(-1, attention_mask.size(-1)) if attention_mask is not None else None
+        token_type_ids = token_type_ids.view(-1, token_type_ids.size(-1)) if token_type_ids is not None else None
+        position_ids = position_ids.view(-1, position_ids.size(-1)) if position_ids is not None else None
         inputs_embeds = (
-            inputs_embeds.view(
-                -1, inputs_embeds.size(-2), inputs_embeds.size(-1)
-            )
+            inputs_embeds.view(-1, inputs_embeds.size(-2), inputs_embeds.size(-1))
             if inputs_embeds is not None
             else None
         )
 
-        return_dict = (
-            return_dict
-            if return_dict is not None
-            else self.config.use_return_dict
-        )
+        return_dict = return_dict if return_dict is not None else self.config.use_return_dict
 
         outputs, context = self.bert(
             input_ids,
@@ -120,9 +90,7 @@ class BertAdapterModel(
             return_dict=return_dict,
             output_adapter_gating_scores=output_adapter_gating_scores,
             output_adapter_fusion_attentions=output_adapter_fusion_attentions,
-            adapter_input_parallelized=kwargs.pop(
-                "adapter_input_parallelized", False
-            ),
+            adapter_input_parallelized=kwargs.pop("adapter_input_parallelized", False),
             output_context=True,
             task_ids=kwargs.pop("task_ids", None),
         )
@@ -150,9 +118,7 @@ class BertAdapterModel(
             return outputs
 
     # Copied from BertLMHeadModel
-    def prepare_inputs_for_generation(
-        self, input_ids, past=None, attention_mask=None, **model_kwargs
-    ):
+    def prepare_inputs_for_generation(self, input_ids, past=None, attention_mask=None, **model_kwargs):
         input_shape = input_ids.shape
         # if model is used as a decoder in encoder-decoder model, the decoder attention mask is created on the fly
         if attention_mask is None:
@@ -166,9 +132,7 @@ class BertAdapterModel(
             "input_ids": input_ids,
             "attention_mask": attention_mask,
             "past_key_values": past,
-            "adapter_input_parallelized": model_kwargs.pop(
-                "adapter_input_parallelized", False
-            ),
+            "adapter_input_parallelized": model_kwargs.pop("adapter_input_parallelized", False),
         }
 
 
@@ -200,11 +164,7 @@ class BertForSequenceClassificationAdapterModel(
             config.num_labels - 1]`. If `config.num_labels == 1` a regression loss is computed (Mean-Square loss), If
             `config.num_labels > 1` a classification loss is computed (Cross-Entropy).
         """
-        return_dict = (
-            return_dict
-            if return_dict is not None
-            else self.config.use_return_dict
-        )
+        return_dict = return_dict if return_dict is not None else self.config.use_return_dict
 
         outputs = self.bert(
             input_ids,
@@ -229,9 +189,7 @@ class BertForSequenceClassificationAdapterModel(
             if self.config.problem_type is None:
                 if self.num_labels == 1:
                     self.config.problem_type = "regression"
-                elif self.num_labels > 1 and (
-                    labels.dtype == torch.long or labels.dtype == torch.int
-                ):
+                elif self.num_labels > 1 and (labels.dtype == torch.long or labels.dtype == torch.int):
                     self.config.problem_type = "single_label_classification"
                 else:
                     self.config.problem_type = "multi_label_classification"
@@ -244,9 +202,7 @@ class BertForSequenceClassificationAdapterModel(
                     loss = loss_fct(logits, labels)
             elif self.config.problem_type == "single_label_classification":
                 loss_fct = CrossEntropyLoss()
-                loss = loss_fct(
-                    logits.view(-1, self.num_labels), labels.view(-1)
-                )
+                loss = loss_fct(logits.view(-1, self.num_labels), labels.view(-1))
             elif self.config.problem_type == "multi_label_classification":
                 loss_fct = BCEWithLogitsLoss()
                 loss = loss_fct(logits, labels)
