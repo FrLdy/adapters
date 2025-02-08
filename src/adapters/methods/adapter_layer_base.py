@@ -463,8 +463,6 @@ class ComposableAdapterLayerBase(AdapterLayerBase):
         context = ForwardContext.get_context()
         task_ids = context.task_ids
 
-        assert hasattr(context, "task_ids")
-
         ordering_idx = task_ids.argsort()
         inter_state = self.compose_batch_split(
             adapter_setup=BatchSplit(

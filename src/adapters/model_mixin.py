@@ -1262,9 +1262,6 @@ class ModelAdaptersMixin(PushAdapterToHubMixin, ABC):
         """
         This method is called by the ``ForwardContext`` at the beginning of the forward pass.
         """
-        if "task_ids" in kwargs:
-            context.task_ids = kwargs.pop("task_ids")
-
         # some warnings if we don't use available adapters
         active_adapters = getattr(self, "active_adapters", None) or AdapterSetup.get_context_adapter_setup()
         if not active_adapters:
@@ -1827,7 +1824,10 @@ class ModelAdaptersMixin(PushAdapterToHubMixin, ABC):
         _is_using_old_format = "value" in inspect.signature(self._set_gradient_checkpointing).parameters
 
         if not _is_using_old_format:
-            self._set_gradient_checkpointing(enable=True, gradient_checkpointing_func=gradient_checkpointing_func)
+            self._set_gradient_checkpointing(
+                enable=True,
+                gradient_checkpointing_func=gradient_checkpointing_func,
+            )
         else:
             self.apply(partial(self._set_gradient_checkpointing, value=True))
             logger.warning(

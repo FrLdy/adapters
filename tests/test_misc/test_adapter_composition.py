@@ -3,7 +3,7 @@ import unittest
 import torch
 
 import adapters
-from adapters import IA3Config, LoRAConfig, PrefixTuningConfig, SeqBnConfig
+from adapters import ForwardContext, IA3Config, LoRAConfig, PrefixTuningConfig, SeqBnConfig
 from adapters.composition import (
     Average,
     BatchSplit,
@@ -14,9 +14,8 @@ from adapters.composition import (
     Stack,
     parse_composition,
 )
-from adapters.models.bert.adapter_model import BertForSequenceClassificationAdapterModel
 from tests.test_methods.method_test_impl.utils import ids_tensor
-from transformers import BertConfig
+from transformers import BertConfig, BertForSequenceClassification
 from transformers.testing_utils import require_torch, torch_device
 
 
@@ -54,7 +53,7 @@ class AdapterCompositionTest(unittest.TestCase):
         return SeqBnConfig()
 
     def build_model(self):
-        model = BertForSequenceClassificationAdapterModel(
+        model = BertForSequenceClassification(
             BertConfig(
                 hidden_size=32,
                 num_hidden_layers=4,
@@ -176,7 +175,13 @@ class AdapterCompositionTest(unittest.TestCase):
         self.assertEqual(logits.shape, (2, 2))
 
     def test_multi_task_learning(self):
+        if MultiTaskLearning in self.unsupported_blocks or BatchSplit in self.unsupported_blocks:
+            self.skipTest("MultiTaskLearning or BatchSplit not supported by adapter config.")
         model = self.build_model()
+
+        if "task_ids" not in ForwardContext.context_args:
+            ForwardContext.context_args.add("task_ids")
+
         model.set_active_adapters(MultiTaskLearning("a", "b", "c", "d"))
         inputs = {
             "input_ids": ids_tensor((4, 128), 1000).to(torch_device),
